@@ -57,10 +57,13 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     number_of_posts = posts.count()
+    following = Follow.objects.filter(user=request.user, author=user).exists() if request.user.is_authenticated else False
     context = {
         'author': user,
         'number_of_posts': number_of_posts,
         'page': page,
+        'following': following,
+        'profile': user
     }
     return render(request, 'profile.html', context)
 
@@ -71,7 +74,6 @@ def post_view(request, username, post_id):
     post_list = Post.objects.filter(author=post.author)
     form = CommentForm(request.POST or None)
     comments = post.comments.select_related('author').all()
-    # breakpoint()
     return render(
         request,
         'post.html',
@@ -132,8 +134,7 @@ def add_comment(request, username, post_id):
 @login_required
 def follow_index(request):
     post_list = Post.objects.filter(author__following__user=request.user)
-    # post_list = Post.objects.order_by('-pub_date')
-    # print(post_list)
+    # print(post_list)??
     paginator = Paginator(post_list, 10)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
