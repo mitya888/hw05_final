@@ -2,7 +2,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
-from posts.models import Group, Post, Follow, USER_MODEL, Comment
+from posts.models import Group, Post, Follow, USER_MODEL
 
 
 class PostPagesTests(TestCase):
@@ -150,17 +150,16 @@ class PostPagesTests(TestCase):
         """Авторизованный пользователь может подписываться
         на других пользователей"""
         follow_count = Follow.objects.count()
-        response = self.authorized_client.get(
+        self.authorized_client.get(
             reverse('profile_follow', kwargs={'username': 'gena-2'}))
         follow_count_after = Follow.objects.all().count()
-        # breakpoint()
         self.assertEqual(follow_count_after, follow_count + 1)
 
     def test_authorized_user_unfollow(self):
         """Авторизованный пользователь может отписываться от
         пользователей, на которых он подписан"""
-        follow = Follow(author=self.user2, user=self.user)
-        response = self.authorized_client.get(
+        Follow(author=self.user2, user=self.user)
+        self.authorized_client.get(
             reverse('profile_unfollow', kwargs={'username': 'gena-2'}))
         follow_exist = Follow.objects.filter(
             author=self.user2, user=self.user).exists()
@@ -170,7 +169,7 @@ class PostPagesTests(TestCase):
         """Новая запись пользователя появляется в ленте тех, кто на него
         подписан и не появляется в ленте тех, кто не подписан на него."""
         post1 = self.post
-        response = self.authorized_client_2.get(
+        self.authorized_client_2.get(
             reverse('profile_follow', kwargs={'username': 'gena'}))
         post_list = Post.objects.filter(author__following__user=self.user2)
         post_list2 = Post.objects.filter(author__following__user=self.user)

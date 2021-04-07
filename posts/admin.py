@@ -41,11 +41,15 @@ class GroupAdmin(admin.ModelAdmin):
 
 @admin.register(models.Comment)
 class CommentAdmin(admin.ModelAdmin):
+    """Класс используется для создания интерфейса комментарий"""
+
     list_display = ("post", "author", "text", "created")
 
 
 @admin.register(models.Follow)
 class FollowAdmin(admin.ModelAdmin):
+    """Класс используется для создания интерфейса подписок"""
+
     list_display = ("user", "author")
     search_fields = ("user",)
     list_filter = ("user",)

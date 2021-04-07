@@ -4,7 +4,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 
 from .forms import PostForm, CommentForm
-from .models import Post, Group, Comment, Follow
+from .models import Post, Group, Follow
 
 User = get_user_model()
 
@@ -73,7 +73,6 @@ def profile(request, username):
 def post_view(request, username, post_id):
     """"Представление страницы отдельного поста"""
     post = get_object_or_404(Post, pk=post_id, author__username=username)
-    post_list = Post.objects.filter(author=post.author)
     form = CommentForm(request.POST or None)
     comments = post.comments.select_related('author').all()
     return render(
