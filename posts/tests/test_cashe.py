@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from posts.models import USER_MODEL, Group, Post
 
+
 class PostsPagesTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -25,7 +26,6 @@ class PostsPagesTests(TestCase):
             group=cls.group,
             author=USER_MODEL.objects.create(username='anonymous_test_author'),
         )
-
 
     def test_cache(self):
         """Тестирование кеширования главной страницы"""

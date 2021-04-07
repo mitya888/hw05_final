@@ -82,6 +82,19 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    """Создаем модель создания комментария с названием Comment
+    со свойствами:
+
+    Properties
+    ----------
+    text:
+        текст комментария
+    created:
+        дата публикации комментария
+    author:
+        автор комментария
+    post:
+        принадлежность комментария к посту"""
 
     post = models.ForeignKey(
         Post,
@@ -105,6 +118,16 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
+    """Создаем модель системы подписок с названием Comment
+    со свойствами:
+
+    Properties
+    ----------
+    user:
+        подписчик
+    author:
+        на кого подписаны"""
+
     user = models.ForeignKey(
         USER_MODEL, on_delete=models.CASCADE,
         related_name="follower"

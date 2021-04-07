@@ -40,7 +40,7 @@ def new_post(request):
     """Представление формы новой записи"""
     form = PostForm()
     if request.method == 'POST':
-        form = PostForm(request.POST,files=request.FILES or None)
+        form = PostForm(request.POST, files=request.FILES or None)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
@@ -57,7 +57,9 @@ def profile(request, username):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     number_of_posts = posts.count()
-    following = Follow.objects.filter(user=request.user, author=user).exists() if request.user.is_authenticated else False
+    following = Follow.objects.filter(
+        user=request.user,
+        author=user).exists() if request.user.is_authenticated else False
     context = {
         'author': user,
         'number_of_posts': number_of_posts,
@@ -92,12 +94,17 @@ def post_edit(request, username, post_id):
     if request.user != profile:
         return redirect('post', username=username, post_id=post_id)
     # добавим в form свойство files
-    form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
-    
+    form = PostForm(
+        request.POST or None,
+        files=request.FILES or None,
+        instance=post)
     if request.method == 'POST':
         if form.is_valid():
             form.save()
-            return redirect("post", username=request.user.username, post_id=post_id)
+            return redirect(
+                "post",
+                username=request.user.username,
+                post_id=post_id)
     return render(
         request, 'post_new.html', {'form': form, 'post': post},
     )
@@ -134,12 +141,12 @@ def add_comment(request, username, post_id):
 @login_required
 def follow_index(request):
     post_list = Post.objects.filter(author__following__user=request.user)
-    # print(post_list)??
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list.order_by('-pub_date'), 10)
     page_number = request.GET.get("page")
     page = paginator.get_page(page_number)
     context = {
         "page": page,
+        'paginator': paginator
     }
     return render(request, "follow.html", context)
 

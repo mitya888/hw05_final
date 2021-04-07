@@ -10,9 +10,6 @@ from django.core.cache import cache
 from posts.forms import PostForm
 from posts.models import Group, Post, USER_MODEL
 
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 class PostFormTests(TestCase):
     @classmethod
@@ -20,7 +17,7 @@ class PostFormTests(TestCase):
         super().setUpClass()
 
         settings.MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
-        cls.author = User.objects.create(username='user')
+        cls.author = USER_MODEL.objects.create(username='user')
 
         cls.form = PostForm()
         # Создаем пользователя
@@ -92,7 +89,6 @@ class PostFormTests(TestCase):
         self.assertRedirects(response, reverse('post', kwargs={
             'username': self.post.author.username, 'post_id': self.post.id}))
 
-
     def test_create_post_with_image(self):
         """Валидная форма создает запись в Post with image."""
         tasks_count = Post.objects.count()
@@ -132,4 +128,3 @@ class PostFormTests(TestCase):
                 image='posts/small.gif'
             ).exists(),
         )
-        
