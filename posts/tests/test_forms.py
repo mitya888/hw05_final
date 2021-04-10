@@ -1,5 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
+from http import HTTPStatus
 
 import shutil
 import tempfile
@@ -24,6 +25,7 @@ class PostFormTests(TestCase):
         cls.user = USER_MODEL.objects.create_user(username='lex')
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
+        cls.guest_client = Client()
 
         cls.group = Group.objects.create(
             title='Тестовый заголовок',
@@ -85,9 +87,53 @@ class PostFormTests(TestCase):
             data=form_data_edit,
             follow=True
         )
-
         self.assertRedirects(response, reverse('post', kwargs={
             'username': self.post.author.username, 'post_id': self.post.id}))
+
+    def test_guest_client_post_edit(self):
+        """НЕ авторизированый пользователь"""
+        """НЕ может редактировать пост """
+        post_count = Post.objects.count()
+        form_data = {
+            'text': 'Отредактрированный текст',
+            'group': self.group.id
+        }
+        response = self.guest_client.post(
+            reverse('post_edit',
+                    kwargs={'username': self.user.username,
+                            'post_id': self.post.id}),
+            data=form_data, follow=False)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Post.objects.count(), post_count)
+        self.assertFalse(
+            Post.objects.filter(
+                text='Отредактрированный текст',
+                group=self.group.id
+            ).exists()
+        )
+
+    def test_guest_client_create_post(self):
+        """Не авторизированый пользователь не может создавать новый пост"""
+        post_count = Post.objects.count()
+        form_data = {
+            'text': 'text',
+            'group': self.group.id,
+            'author': self.user
+        }
+        # Отправляем POST-запрос
+        response = self.guest_client.post(
+            reverse('new_post'),
+            data=form_data,
+            follow=False
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(Post.objects.count(), post_count)
+        self.assertFalse(
+            Post.objects.filter(
+                text='text',
+                group=self.group.id
+            ).exists()
+        )
 
     def test_create_post_with_image(self):
         """Валидная форма создает запись в Post with image."""

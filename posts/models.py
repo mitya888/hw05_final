@@ -111,6 +111,8 @@ class Comment(models.Model):
     created = models.DateTimeField('date published', auto_now_add=True)
 
     class Meta:
+        verbose_name = 'Комментарий' 
+        verbose_name_plural = 'Комментарии'         
         ordering = ('-created',)
 
     def __str__(self):
@@ -130,9 +132,15 @@ class Follow(models.Model):
 
     user = models.ForeignKey(
         USER_MODEL, on_delete=models.CASCADE,
-        related_name="follower"
+        related_name="follower",
+        verbose_name = 'Подписчики'
     )
     author = models.ForeignKey(
         USER_MODEL, on_delete=models.CASCADE,
-        related_name="following"
+        related_name="following",
+        verbose_name = 'Подписки'
     )
+
+    class Meta:
+        verbose_name = 'Подписки' 
+        verbose_name_plural = 'Подписки'

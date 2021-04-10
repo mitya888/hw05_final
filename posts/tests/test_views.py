@@ -155,29 +155,50 @@ class PostPagesTests(TestCase):
         follow_count_after = Follow.objects.all().count()
         self.assertEqual(follow_count_after, follow_count + 1)
 
-    def test_authorized_user_unfollow(self):
-        """Авторизованный пользователь может отписываться от
+    def test_authorized_user_can_unfollow(self):
+        """Проверяем, что авторизованный пользователь может отписываться от
         пользователей, на которых он подписан"""
-        Follow(author=self.user2, user=self.user)
+        follow_count = Follow.objects.count()
         self.authorized_client.get(
-            reverse('profile_unfollow', kwargs={'username': 'gena-2'}))
-        follow_exist = Follow.objects.filter(
-            author=self.user2, user=self.user).exists()
-        self.assertEqual(follow_exist, False)
+            reverse ('profile_follow', kwargs={'username': 'gena-2'}))
+        follow_count = Follow.objects.all().count()
+        self.authorized_client.get(
+            reverse ('profile_unfollow', kwargs={'username': 'gena-2'}))
+        unfollow_count = Follow.objects.all().count()
+        self.assertEqual(unfollow_count, follow_count - 1)
 
     def test_follow_user_unfollow(self):
         """Новая запись пользователя появляется в ленте тех, кто на него
         подписан и не появляется в ленте тех, кто не подписан на него."""
-        post1 = self.post
-        self.authorized_client_2.get(
-            reverse('profile_follow', kwargs={'username': 'gena'}))
-        post_list = Post.objects.filter(author__following__user=self.user2)
-        post_list2 = Post.objects.filter(author__following__user=self.user)
-        self.assertTrue(post1 in post_list)
-        self.assertFalse(post1 in post_list2)
+        Follow.objects.create(user=self.user, author=self.user2)
+        tekst = Post.objects.create(author=self.user2, text=self.post.text)
+
+        response = self.authorized_client.get(reverse('follow_index'))
+        self.assertContains(response, self.post.text)
+
+        response = self.authorized_client_2.get(reverse('follow_index'))
+        self.assertNotContains(response, self.post.text)
 
     def test_anonim_cant_comment_post(self):
         """Только авторизированный пользователь может комментировать посты."""
         response = self.guest_client.get(
             reverse('add_comment', args=[self.user, self.post.id]))
         self.assertEqual(response.status_code, 302)
+
+    def test_guest_user_not_follow(self):
+        """Анонимный пользователь НЕ может подписываться
+        на других пользователей"""
+        follow_count = Follow.objects.count()
+        self.guest_client.get(
+            reverse('profile_follow', kwargs={'username': 'gena-2'}))
+        follow_count_after = Follow.objects.all().count()
+        self.assertEqual(follow_count_after, follow_count)
+
+    def test_author_user_not_follow(self):
+        """Автор НЕ может подписываться
+        на самого себя"""
+        follow_count = Follow.objects.count()
+        self.authorized_client.get(
+            reverse('profile_follow', kwargs={'username': self.post.author}))
+        follow_count_after = Follow.objects.all().count()
+        self.assertEqual(follow_count_after, follow_count)

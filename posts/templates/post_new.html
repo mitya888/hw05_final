@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data" action={% if post %}"{% url 'post_edit' username=user.username post_id=post.id %}"{% else %}{% url 'new_post' %}{% endif %}>
+<form method="post" enctype="multipart/form-data" action="{% if post %}{% url 'post_edit' username=user.username post_id=post.id %}{% else %}{% url 'new_post' %}{% endif %}">
 
 {% csrf_token %}
 {% for field in form %}

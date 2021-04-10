@@ -46,7 +46,8 @@ def new_post(request):
             post.author = request.user
             form.save()
             return redirect("index")
-    return render(request, "post_new.html", {'form': form})
+    return render(request, "post_new.html", {
+        'form': form, "post": None})
 
 
 def profile(request, username):
@@ -75,14 +76,13 @@ def post_view(request, username, post_id):
     post = get_object_or_404(Post, pk=post_id, author__username=username)
     form = CommentForm(request.POST or None)
     comments = post.comments.select_related('author').all()
-    return render(
-        request,
-        'post.html',
-        {'form': form,
-         'post': post,
-         'author': post.author,
-         'comments': comments,
-         })
+    context = {
+        'form': form,
+        'post': post,
+        'author': post.author,
+        'comments': comments
+    }
+    return render(request, 'post.html', context)
 
 
 @login_required
@@ -128,7 +128,7 @@ def server_error(request):
 def add_comment(request, username, post_id):
     """"Функция для сохранения комментарий"""
     post = get_object_or_404(Post, pk=post_id, author__username=username)
-    form = CommentForm(request.POST or None,)
+    form = CommentForm(request.POST or None, )
     if form.is_valid():
         comment = form.save(commit=False)
         comment.author = request.user

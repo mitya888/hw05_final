@@ -51,6 +51,4 @@ class FollowAdmin(admin.ModelAdmin):
     """Класс используется для создания интерфейса подписок"""
 
     list_display = ("user", "author")
-    search_fields = ("user",)
-    list_filter = ("user",)
     empty_value_display = "-пусто-"
