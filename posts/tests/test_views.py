@@ -160,10 +160,10 @@ class PostPagesTests(TestCase):
         пользователей, на которых он подписан"""
         follow_count = Follow.objects.count()
         self.authorized_client.get(
-            reverse ('profile_follow', kwargs={'username': 'gena-2'}))
+            reverse('profile_follow', kwargs={'username': 'gena-2'}))
         follow_count = Follow.objects.all().count()
         self.authorized_client.get(
-            reverse ('profile_unfollow', kwargs={'username': 'gena-2'}))
+            reverse('profile_unfollow', kwargs={'username': 'gena-2'}))
         unfollow_count = Follow.objects.all().count()
         self.assertEqual(unfollow_count, follow_count - 1)
 
@@ -171,7 +171,7 @@ class PostPagesTests(TestCase):
         """Новая запись пользователя появляется в ленте тех, кто на него
         подписан и не появляется в ленте тех, кто не подписан на него."""
         Follow.objects.create(user=self.user, author=self.user2)
-        tekst = Post.objects.create(author=self.user2, text=self.post.text)
+        Post.objects.create(author=self.user2, text=self.post.text)
 
         response = self.authorized_client.get(reverse('follow_index'))
         self.assertContains(response, self.post.text)
